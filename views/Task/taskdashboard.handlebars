@@ -27,26 +27,32 @@
                 <th>Operation</th>
         </thead>
         <tbody>
-           
+           {{#each data}}
                 <tr>
                    <td>
-                        <a href="/task/profile/{{this.id}}" class="task-title">Task Title Goes Here</a>
+                        <a href="" class="task-title">{{this.title}}</a>
                    </td>
                    <td>
-                       <span>Priority</span>
-                      
+                       <span>{{this.priority}}</span>
                    </td>
                    <td>
-                        <span>Status</span>
+                       <span>{{this.status}}</span>
                    </td>
                    <td>
-                       <span>Due Date</span>
+                       <span>{{this.dueDate}}</span>
                    </td>
                    <td>
-                        <a href="" class="edit-delete-button">Edit</a>
-                        <a href="" class="edit-delete-button">Delete</a>
+                        <a href="/task/edit/{{this.id}}" class="edit-delete-button">Edit</a>
+                        <a href="/task/delete/{{this.id}}?method=DELETE" class="edit-delete-button">Delete</a>
                    </td> 
                 </tr>
+            
+            <!--if has no data in the array, else will be executed-->
+            {{else}}
+                <td colspan="5">
+                    <p>No task in the database</p>
+                </td>
+            {{/each}}
     </tbody>
     </table>
  
