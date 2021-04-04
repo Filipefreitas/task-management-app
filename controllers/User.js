@@ -4,6 +4,7 @@ const { isValidObjectId } = require('mongoose');
 const router = express.Router();
 const userModel = require("../models/User");
 const path = require("path"); //native. Does not need to be installed
+const bcrypt = require('bcryptjs');
 
 //Route to direct use to Registration form
 router.get("/register",(req,res)=>
@@ -56,12 +57,57 @@ router.get("/login",(req,res)=>
 //Route to process user's request and data when user submits login form
 router.post("/login",(req,res)=>
 {
+    //search to see it email exists
+    //findById only allows you to serach by the object id
+    //findOne allows you to search by any key, but you have to pass an object 
+    userModel.findOne({email:req.body.email})
+    .then(user=>{
+        const errors = [];
 
-    res.redirect("/user/profile/")
+        //email not found
+        if(user==null)
+        {
+            errors.push("Sorry, your email and/or password is incorrect");
+            res.render("User/login", {
+                //long syntax
+                /*data : errors*/
+                errors
+            })
+        }
+
+        //email found
+        else
+        {
+            //search to check if password matches the encrypter password
+            bcrypt.compare(req.body.password, user.password)
+            .then(isMatched=>{
+                if(isMatched)
+                {
+                    //create session
+                    //userInfo is the name of the session, having the entire user document assigned to it
+                    req.session.userInfo = user;
+                    res.redirect("/user/profile/");
+
+                }
+                else
+                {   
+                    errors.push("Sorry, your email and/or password is incorrect");
+                    res.render("User/login", {
+                        errors
+                    })
+                }
+            })
+            .catch(err=>console.log(`Error ${err}`))
+        }
+    })
+    .catch(err=>console.log(`Error ${err}`));
 });
 
-router.get("/profile/:id",(req,res)=>
+//since the session has been added, it is no longer needed to add dynamic id route: 
+router.get("/profile",(req,res)=>
 {
+    res.render("User/userDashboard");
+    /*
     //query the databse to know what image to show
     userModel.findById(req.params.id)
     .then((user)=>
@@ -74,7 +120,14 @@ router.get("/profile/:id",(req,res)=>
         });
     })
     .catch(err=>console.log(`Error :${err}`))
+    */ 
 })
 
+//kills the session
+router.get("/logout",(req,res)=>
+{
+    req.session.destroy();
+    res.redirect("/user/login");
+})
 
 module.exports=router;

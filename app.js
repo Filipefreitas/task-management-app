@@ -4,6 +4,7 @@ const bodyParser = require("body-parser");
 const mongoose = require('mongoose');
 const moment = require('moment');
 const fileUpload = require('express-fileupload');
+const session = require('express-session');
 
 //This loads all our environment variables from the keys.env
 require("dotenv").config({path:'./config/keys.env'});
@@ -52,7 +53,20 @@ app.use((req,res,next)=>{
 })
 
 app.use(fileUpload());
-    
+
+app.use(session({
+    //there is an internal mecanism that hashes this key. It works like a salt
+    secret: `${process.env.SECRET_KEY}`,
+    resave: false,
+    saveUninitialized: true,
+}))
+
+  app.use((req,res,next)=>{
+    //every single handlebars file can access this variable;
+    res.locals.user= req.session.userInfo;
+    next();
+})
+
 //MAPs EXPRESS TO ALL OUR  ROUTER OBJECTS
 app.use("/",generalRoutes);
 app.use("/user",userRoutes);
