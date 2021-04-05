@@ -40,7 +40,7 @@ const Schema = mongoose.Schema;
     }
 });
 
-/*a
+/*
     For every Schema, you must also create a model object
     Model will allow you to perform CRUD operations in a given collection
     Create one schema per collection

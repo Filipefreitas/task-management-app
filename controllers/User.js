@@ -5,6 +5,8 @@ const router = express.Router();
 const userModel = require("../models/User");
 const path = require("path"); //native. Does not need to be installed
 const bcrypt = require('bcryptjs');
+const isAuthenticated = require("../middleware/auth");
+const dashboardLoader = require("../middleware/authorization");
 
 //Route to direct use to Registration form
 router.get("/register",(req,res)=>
@@ -40,7 +42,8 @@ router.post("/register",(req,res)=>
                 })
                 .then()
                 {
-                    res.redirect(`/user/profile/${user._id}`);
+                    /*res.redirect(`/user/profile/${user._id}`);*/
+                    res.redirect(`/user/login`);
                 }
             })
         .catch(err=>console.log(`Error while uploading profile pic ${err}`));
@@ -86,7 +89,7 @@ router.post("/login",(req,res)=>
                     //create session
                     //userInfo is the name of the session, having the entire user document assigned to it
                     req.session.userInfo = user;
-                    res.redirect("/user/profile/");
+                    res.redirect("/user/profile");
 
                 }
                 else
@@ -103,11 +106,15 @@ router.post("/login",(req,res)=>
     .catch(err=>console.log(`Error ${err}`));
 });
 
+router.get("/profile",isAuthenticated,dashboardLoader);
+
+/*
 //since the session has been added, it is no longer needed to add dynamic id route: 
-router.get("/profile",(req,res)=>
+router.get("/profile",isAuthenticated,(req,res)=>
 {
+    
     res.render("User/userDashboard");
-    /*
+    
     //query the databse to know what image to show
     userModel.findById(req.params.id)
     .then((user)=>
@@ -120,8 +127,15 @@ router.get("/profile",(req,res)=>
         });
     })
     .catch(err=>console.log(`Error :${err}`))
-    */ 
+    
 })
+
+
+router.get("/admin-profile",isAuthenticated,(req,res)=>
+{
+    res.render("User/adminDashboard");
+})
+*/
 
 //kills the session
 router.get("/logout",(req,res)=>
